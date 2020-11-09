@@ -15,9 +15,12 @@ To initialize attractmode, you must launch it locally (not over ssh) after insta
 
 ## BEFORE DOING ANYTHING ELSE: 
 
-Change the keyboard configuration otherwise, likely the tilde and other keys will be weird UK layout
+Change the keyboard configuration otherwise, the pound, tilde and other keys will be weird UK layout
 
     sudo dpkg-reconfigure keyboard-configuration
+
+or this can be changed via localisation options sudo raspi-config
+
 
 ------------------------------------------------------------------
 ## 1. Network Setup
@@ -169,11 +172,13 @@ To quickly grab the specific machine serial number
 
 All of the following installations were handled through Retropie-Setup
 
-### install attractmode
+### install attractmode (attract mode)
 
-It can be installed as an "experimental" package in RetroPie 3, but It MUST be built manually on Raspberry Pi4 as of 6/28/2020 due to a limitation of the way Raspberry Pi 4's GPU is built (SFML-Pi has DRM problems or something) 
+AttractMode can be installed as an "experimental" package in RetroPie 3, but It MUST be built manually on Raspberry Pi4 as of 6/28/2020 due to a limitation of the way Raspberry Pi 4's GPU is built (SFML-Pi has DRM problems or something) 
 
-Once installed, run it directly, do not run through terminal
+Once installed, run it directly, do not run through a remote terminal
+
+It can be run by calling `attract` or for more robust logging: `attract --loglevel debug`
 
 #### Install Binary if feeling lazy on Raspberry Pi 3
 NOTE: Installed version doesn't include hardware acceleration, so follow "install manually" directions below. 
@@ -198,8 +203,12 @@ This works on Raspbian Stretch as well as Jessie.
 
 *Install "sfml-pi" and Attract-Mode dependencies*
 
-	sudo apt-get install cmake libflac-dev libogg-dev libvorbis-dev libopenal-dev libfreetype6-dev libudev-dev libjpeg-dev libudev-dev libfontconfig1-dev
-	
+    sudo apt-get install cmake libflac-dev libogg-dev libvorbis-dev libopenal-dev libjpeg8-dev libfreetype6-dev libudev-dev libraspberrypi-dev
+    
+    # or try 
+    # sudo apt-get install cmake libflac-dev libogg-dev libvorbis-dev libopenal-dev libfreetype6-dev libudev-dev libjpeg-dev libudev-dev libfontconfig1-dev
+
+
 *Download and build sfml-pi*
 Install and make 
 
@@ -207,16 +216,20 @@ Install and make
 	git clone --depth 1 https://github.com/mickelson/sfml-pi sfml-pi
 	mkdir sfml-pi/build; cd sfml-pi/build
 	cmake .. -DSFML_RPI=1 -DEGL_INCLUDE_DIR=/opt/vc/include -DEGL_LIBRARY=/opt/vc/lib/libbrcmEGL.so -DGLES_INCLUDE_DIR=/opt/vc/include -DGLES_LIBRARY=/opt/vc/lib/libbrcmGLESv2.so
+    make -j4
 	sudo make install
 	sudo ldconfig
-	
+
+Note: if you are using a Pi firmware older than 1.20160921-1, please replace "libbrcmEGL.so" and "libbrcmGLESv2" with the old names, "libEGL.so" and "libGLESv2". This mode uses OpenGL ES
+
+
 *Build FFmpeg with mmal support for Attract mode(hardware accelerated video decoding)*
 Install & make. When getting to the .configure step... wait. It takes awhile and doesn't look like it's working. Go get coffee. "Make" takes a really long time too
 	
 	cd ~/develop
 	git clone --depth 1 git://source.ffmpeg.org/ffmpeg.git
 	cd ffmpeg
-	./configure --enable-mmal --disable-debug --enable-shared
+	./configure --enable-mmal --disable-debug --enable-shared --extra-ldflags="-latomic"    # <-- this last bit is probably only needed on buster
 	make  #Potentially add the parameter "-j4" when you run make on a pi2 or pi3 to speed the build significantly. In my experience it causes fatal errors in compiling
 	sudo make install
 	sudo ldconfig
@@ -227,8 +240,8 @@ Install and make
 	cd ~/develop
 	git clone --depth 1 https://github.com/mickelson/attract attract
 	cd attract
-	make USE_GLES=1
-	sudo make install USE_GLES=1
+	make USE_MMAL=1 USE_GLES=1 
+	sudo make install USE_MMAL=1 USE_GLES=1
 
 *Delete build files*
 
@@ -238,10 +251,13 @@ Install and make
 
 	attract -v
 
-*It's important to load AttractMode the first time so that it creates configuration files. Run 'attract' at the commmand line*
+*It's important to load AttractMode the first time so that it creates configuration files. Run `attract` or `attract --loglevel debug` at the commmand line*
 
-##### Install manually for Raspberry Pi 4
-[Manual compile instructions on GitHub](https://github.com/mickelson/attract/issues/576)
+##### Install manually for Raspberry Pi 4 / buster
+[Manual compile instructions on GitHub](https://github.com/mickelson/attract/wiki/Compiling-on-the-Raspberry-Pi-4-%28Raspbian-Buster%29)
+[Related post](https://github.com/mickelson/attract/issues/576)
+
+
 This works on Raspbian Buster on Pi 4
 
 Start with a CLEAN RetroPie install or this likely won't work. 
@@ -258,12 +274,14 @@ Start with a CLEAN RetroPie install or this likely won't work.
 
 	sudo apt-get install -y cmake libflac-dev libogg-dev libvorbis-dev libopenal-dev libjpeg8-dev libfreetype6-dev libudev-dev libdrm-dev libgbm-dev libegl1-mesa-dev
 	
+    
 *Download and build sfml-pi*
 Install and make 
 
 	git clone --depth 1 https://github.com/mickelson/sfml-pi sfml-pi
 	mkdir sfml-pi/build; cd sfml-pi/build
-	cmake .. -DSFML_DRM=1
+	cmake .. -DSFML_DRM=1 -DSFML_OPENGL_ES=1
+    make -j4
 	sudo make install
 	sudo ldconfig
 
@@ -276,7 +294,7 @@ Install and make
 	
 	git clone --depth 1 https://github.com/mickelson/attract attract
 	cd attract
-	make USE_DRM=1 USE_MMAL=1
+	make USE_DRM=1 USE_MMAL=1  # this doesn't work -> USE_GLES=1
 	sudo make install USE_DRM=1 USE_MMAL=1
 
 *Delete build files*
@@ -287,7 +305,7 @@ Install and make
 
 	attract -v
 
-Before the next reboot, make sure you go into the autostart and change the autostart to "attract"
+Before the next reboot, make sure you go into the autostart and change the autostart to `attract`
 
 	sudo pico /opt/retropie/configs/all/autostart.sh 
 
@@ -304,22 +322,145 @@ Most emulators are installed automatically, a few must be installed from the opt
 
 - advmame-0.94 (not available on pi4)
 - advmame-1.4 (not available on pi4)
-- 102 advmame
-- 109 daphne
+- 102 advmame #advmame doesn't support RetroArch overlays
+- 109 daphne (lr-daphne likely doesnt' work)
 - 113 dosbox
 - 125 lr-freeintv
-- 144 scummvm 
+- 144 scummvm  (there's now an experimental/optional libretro scummvm installation)
 - 315 kodi
 - 833 scraper 
 
+#### Compile Mame 189
 
+This requires a version of SDL2 without X11. So we'll need to remove SDL2 & install. Any program that uses SDL2 to draw to the framebuffer should now be doing it in hardware on the raspberry pis videocore4 using opengles2.
+
+    # remove SDL2
+    sudo apt-get remove -y --force-yes libsdl2-dev
+    sudo apt-get autoremove -y
+    
+    # install dependencies 
+    sudo apt-get -y install libfontconfig-dev qt5-default automake mercurial libtool libfreeimage-dev libopenal-dev libpango1.0-dev libsndfile-dev libudev-dev libtiff5-dev libwebp-dev libasound2-dev libaudio-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxss-dev libesd0-dev freeglut3-dev libmodplug-dev libsmpeg-dev libjpeg-dev
+    
+    # build
+    hg clone http://hg.libsdl.org/SDL
+    cd SDL
+    ./autogen.sh
+    ./configure --disable-pulseaudio --disable-esd --disable-video-mirror --disable-video-wayland --disable-video-opengl --host=arm-raspberry-linux-gnueabihf
+    make
+    sudo make install
+    
+    # get all the libraries
+    cd ~/develop
+    wget http://www.libsdl.org/projects/SDL_image/release/SDL2_image-2.0.2.tar.gz
+    wget http://www.li
+    bsdl.org/projects/SDL_mixer/release/SDL2_mixer-2.0.2.tar.gz
+    wget http://www.libsdl.org/projects/SDL_net/release/SDL2_net-2.0.1.tar.gz
+    wget http://www.libsdl.org/projects/SDL_ttf/release/SDL2_ttf-2.0.14.tar.gz
+
+    #Uncompress them all
+    tar zxvf SDL2_image-2.0.2.tar.gz 
+    tar zxvf SDL2_mixer-2.0.2.tar.gz 
+    tar zxvf SDL2_net-2.0.1.tar.gz 
+    tar zxvf SDL2_ttf-2.0.14.tar.gz
+    
+    # Build the Image file loading library
+    cd SDL2_image-2.0.2 
+    ./autogen.sh 
+    ./configure 
+    make 
+    sudo make install
+    cd ..
+
+    # Build the Audio mixer library
+    cd SDL2_mixer-2.0.2 
+    ./autogen.sh 
+    ./configure 
+    make 
+    sudo make install
+    cd ..
+
+    # Build the Networking library
+    cd SDL2_net-2.0.1 
+    ./autogen.sh 
+    ./configure 
+    make 
+    sudo make install
+    cd ..
+
+    #install freetype-config (required by truetype font library)
+     wget -c https://download.savannah.gnu.org/releases/freetype/freetype-2.9.1.tar.bz2
+     tar xvfz freetype-2.9.1.tar.bz2
+     cd freetype-2.9.1.tar.bz2
+     ./configure --prefix=/usr/local/freetype2 --enable-freetype-config
+     make
+     sudo make install
+     cd ..
+    
+    # add this location (/usr/local/freetype2/) to
+    sudo pico /etc/ld.so.conf
+    
+    
+    # Build the Truetype font library
+    cd SDL2_ttf-2.0.14
+    ./autogen.sh
+    ./configure --with-freetype-prefix=/usr/local/freetype2
+    make
+    sudo make install
+    cd ..
+
+Create a larger swap file
+
+    sudo nano /etc/dphys-swapfile
+
+Find the line that says CONF_SWAPSIZE=100 and change the value so that it reads CONF_SWAPSIZE=2048. Save, exit & reboot. Then start to work on MAME
+
+    wget https://github.com/mamedev/mame/releases/download/mame0189/mame0189s.zip 
+    unzip mame0189s.zip -d mame
+    cd mame
+    unzip mame.zip
+
+    sudo pico makefile
+    
+Comment out all of the existing options in the makefile and add these options to the makefile
+
+    REGENIE =1
+    NOWERROR =1
+    TARGET =mame
+    SUBTARGET =arcade
+    USE_QTDEBUG =0
+    #NO_X11 =1
+    NO_OPENGL=1
+    NO_USE_XINPUT =1
+    NO_BGFX=1
+    FORCE_DRC_C_BACKEND =1
+    DEBUG =0
+    ARCHOPTS =-mcpu=cortex-a72 -mtune=cortex-a72  -mfloat-abi=hard -funsafe-math-optimizations -fexpensive-optimizations -fprefetch-loop-arrays
+
+Then make the app
+
+    make -j5
+    
+    cd ~/develop/mame
+    ./mamearcade -cc #create config
+    mkdir roms
+
+Don’t forget to turn the swap file back to 100mb.
+
+    sudo nano /etc/dphys-swapfile
+
+Find the line that says CONF_SWAPSIZE=2048 and change the value so that it reads
+CONF_SWAPSIZE=100. Save and exit, reboot. 
+
+    /home/pi/.mame/mamearcade -inipath /home/pi/.mame/mame.ini /home/pi/.mame/roms/digdug.zip
 #### Experimental Packages
 	
 manage packages > manage optional packages
 
-- lr-mame2003-plus (Pi 4. will be in optional packages on Pi 3)
+- lr-mame2003-plus (Pi 4. On the pi3 this will be in optional packages )
 
-Lr-Daphne, by June 2020 has ceased to be developed and doesn't work. 
+- lr-Daphne, by June 2020 has ceased to be developed and doesn't work. 
+
+To install Daphne [review this youtube video](https://www.youtube.com/watch?v=WKkkwk74Arc)
 
 ### Install Pixel Desktop
 
@@ -507,8 +648,18 @@ How to reset controllers on RetroPie
 1. Choose the option to Clear/Reset Emulation Station input configuration.
 1. Choose Yes to proceed to clear the controller settings.
 
+##### Enable Keyboard input in MAME
+
+Launch a rom from AttractMode or EmulationStation. Open the menu (hotkey plus the xbutton (not the x key... the configured button)
+
+The latest builds of mame2003-plus have a new core option called "Input interface" which allows you to select between retropad, mame_keyboard, and simultaneous.
+
+*retropad* only reads input through the retropad abstraction. With default RetroArch settings, as has been mentioned, the retropad abstraction includes a mapping for player one on the keyboard.
+*mame_keyboard* this only uses the libretro keyboard api to pass keyboard input directly to the MAME keyboard input system.
+*simultaneous* is the 'classic' mame2003 behavior. both input systems simultaneously, including when they overlap.
+
 #### ATTRACTMODE  
-_If you already copied the configs in the "Copy Files" section you can skip this._
+_If you already copied the configs in the "Copy Files" section you can skip this.
 
 	/opt/retropie/configs/all/attractmode (pi3... pi4 version is in ~/.attract)
 
@@ -534,6 +685,10 @@ _If you already copied the configs & retropiemenu in the "Copy Files" section yo
 3. add custom icons to `/home/pi/RetroPie/retropiemenu/icons`
 4. add Attract-Mode.sh script to `/home/pi/RetroPie/retropiemenu/Attract-Mode.sh`
 5. turn off SplashScreen in Emulationstation. Add to es_settings.cfg in `/opt/retropie/configs/all/emulationstation/ ` `<bool name="SplashScreen" value="false" />`
+
+To launch EmulationStation in a rotated mode add this to autostart
+emulationstation --screenrotate 1 --screensize 480 640 --screenoffset 0 0 #counter clockwise, 480x640 and 0,0 offset
+this may crash the scraper UI when using "scrape now" 
 
 #### MAME 
 1. Modify advmame keymap to additionally use C key to enter coins
@@ -623,7 +778,7 @@ run `sudo ./configload picadehat-default` to change back to default
 #### Version 2
 https://github.com/pimoroni/picade-hat
 https://github.com/pimoroni/picade-hat/blob/master/picade.txt
-Linux Keycodes: 
+Linux Keycodes/keyboard bindings: 
 https://github.com/torvalds/linux/blob/master/include/uapi/linux/input-event-codes.h
 https://github.com/libretro/RetroArch/issues/358 you can search in the  /opt/retropie/configs/all/retroarch.cfg  file for "tilde" and you will find the list of acceptable names of inputs in there
 
@@ -632,6 +787,8 @@ https://github.com/libretro/RetroArch/issues/358 you can search in the  /opt/ret
 2. Run `curl -sS https://get.pimoroni.com/picadehat | bash` for one line installation and reboot
 
 3. Edit /boot/config.txt as needed. Without adding the overlay the default keys will be used. Example: 
+
+REMOVE (probably) hdmi_force_hotplug, as this software enables it for some odd reason. 
 
     dtoverlay=picade
     dtparam=up=12
@@ -680,7 +837,7 @@ Testing utility
 ### LedSpicer
 Install and configure from https://sourceforge.net/p/ledspicer/wiki/Deployment/
 
-Update Retropie to the latest version. On 4.3(ish) I was unable to get tinyxml2 to work due to missing dependencies
+Update Retropie to the latest version. On 4.3(ish) Stretch I was unable to get tinyxml2 to work due to missing dependencies
 
 Load prerequisites & get tinyxml2
 
@@ -696,22 +853,22 @@ Download to development folder
 Compile
 
     sudo sh autogen.sh
-    ./configure --enable-ultimateio --enable-ledwiz32 --enable-develop --enable-alsaaudio CPPFLAGS='-DSHOW_OUTPUT=1'
-    (for production use this: ./configure CXXFLAGS='-g0 -O3' --prefix=/usr --sysconfdir=/etc --enable-pacdrive --enable-ultimateio --enable-ledwiz32 --enable-alsaadio)
+    ./configure --enable-ultimateio --enable-ledwiz32 --enable-pacdrive --enable-develop --enable-alsaaudio CPPFLAGS='-DSHOW_OUTPUT=1'
+    (for production use this: ./configure --enable-ultimateio --enable-ledwiz32 --enable-pacdrive --enable-develop --enable-alsaaudio CXXFLAGS='g0 -O3')    
     make clean
-    make
+    make -j4
     sudo make install
     
 
 Copy & edit basic configuration 
 
-    sudo cp /usr/local/share/doc/ledspicer/examples/ledspicer.conf
+    sudo cp /usr/local/share/doc/ledspicer/examples/ledspicer.conf /usr/local/etc/ledspicer.conf
     
 Configure 
     
     sudo pico /usr/local/etc/ledspicer.conf
     
-Instll UDEV Rules
+Install UDEV Rules
     
     sudo cp /usr/local/share/doc/ledspicer/examples/21-ledspicer.rules /etc/udev/rules.d/
     sudo chmod 744 /etc/udev/rules.d/21-ledspicer.rules
@@ -720,7 +877,14 @@ Instll UDEV Rules
 Add default profile
 
     sudo pico /usr/local/share/ledspicer/profiles/default.xml
+
+Set up to run as root on startup
     
+    sudo cp /usr/local/share/doc/ledspicer/examples/ledspicerd.service /etc/systemd/system
+    sudo systemctl enable ledspicerd.service
+    
+or... 
+
 Run LEDSpicer daemon
 
     ledspicerd  
@@ -752,7 +916,9 @@ To capture inputs of gamepads
 
     inputseeker
     
-
+To scan for events in MAME games
+    
+    nc -v localhost 8000
 
 ------------------------------------------------------------------
 
@@ -895,7 +1061,7 @@ you'll need to edit this file manually to add the input type of linuxraw rather 
     h264_freq=333
     gpu_mem=256
 
-### Terra Cresta
+### Terra Cresta (terra cresta)
 
 Modified /boot/config.txt to show display vertically display_rotate=1 
 https://www.raspberrypi.org/documentation/configuration/config-txt/video.md
