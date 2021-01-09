@@ -1,3 +1,5 @@
+Anyone that comes across this: Please note, I wrote this for myself to keep track of all the stuff I need to do when setting up a new Pi or running into problems. It's more of a reference than a walk-through. The first part is a bit of a walk-through, but later sections are useful on a more ad-hoc basis. Some of the information gets out of date now and then, but I keep updating this as I go, so there's a lot of useful information here. 
+
 # Modifications
 Plug pi into HDMI & keyboard first before anything else can be done.
 To initialize attractmode, you must launch it locally (not over ssh) after installing ($ attract) 
