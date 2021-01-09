@@ -12,6 +12,8 @@ To initialize attractmode, you must launch it locally (not over ssh) after insta
 8. Machine specific configurations
 9. Index of Commands
 10. Optional Software
+11. mame tips
+12. Troubleshooting
 
 ## BEFORE DOING ANYTHING ELSE: 
 
@@ -164,6 +166,18 @@ Serial number is on last line of cpuinfo and can be used to set up machine speci
 To quickly grab the specific machine serial number
 
 	cat /proc/cpuinfo | grep Serial | cut -d ' ' -f 2
+
+### Set Overscan
+
+Download and install this script to make setting overscan easy, whithout having to guess and reboot each time.
+
+    cd ~/develop
+    wget https://github.com/ukscone/set_overscan/archive/master.zip
+    unzip master.zip && rm master.zip
+    cd set_overscan-master
+    sudo make
+    sudo sh ./set_overscan.sh
+
 
 
 ------------------------------------------------------------------
@@ -486,16 +500,21 @@ To simplify adding files and finding files add a shortcuts folder. Add `/home/pi
 
 Create aliases
 
-	ln -s /opt/retropie/configs/mame-advmame/ 		/home/pi/shortcuts/configs/advmame 
-	ln -s /opt/retropie/configs/all/attractmode 		/home/pi/shortcuts/configs/rp-attract
-	ln -s /boot 						/home/pi/shortcuts/configs/boot
+    mkdir ~/shortcuts
+    mkdir ~/shortcuts/configs
+    mkdir ~/shortcuts/ledspicer
+    mkdir ~/shortcuts/inputs
+    
+	ln -s /boot 						                /home/pi/shortcuts/configs/boot
 	ln -s /opt/retropie/configs/all/emulationstation 	/home/pi/shortcuts/configs/emulationstation
-	ln -s /opt/retropie/configs 				/home/pi/shortcuts/configs/retropie
-	ln -s /etc/init.d 					/home/pi/shortcuts/initd
-	ln -s /dev/input 					/home/pi/shortcuts/inputs/input
-	ln -s /proc/bus/input/devices 				/home/pi/shortcuts/inputs/input_devices 
-	ln -s /home/pi/.kodi/userdata/playlists 		/home/pi/shortcuts/kodi_playlists 
-
+	ln -s /opt/retropie/configs 				        /home/pi/shortcuts/configs/retropieconfigs
+    ln -s /opt/retropie/configs/all/attract             /home/pi/shortcuts/configs/attractmode
+	ln -s /etc/init.d 					                /home/pi/shortcuts/configs/initd
+	ln -s /dev/input 					                /home/pi/shortcuts/inputs/input
+	ln -s /proc/bus/input/devices 				        /home/pi/shortcuts/inputs/input_devices 
+	ln -s /home/pi/.kodi/userdata/playlists 		    /home/pi/shortcuts/kodi_playlists 
+    ln -s /usr/local/share/ledspicer                    /home/pi/shortcuts/ledspicer/configs
+    ln -s /usr/local/etc/ledspicer.conf                 /home/pi/shortcuts/ledspicer/ledspicer.conf
 
 
 ### Copy Files
@@ -557,6 +576,14 @@ Create aliases
 	sshpass -p$(cat /home/pi/sync_pass) rsync -avz mahuti@192.168.1.93:/Volumes/retropie/opt/retropie/configs/sega32x/launching.png  /opt/retropie/configs/sega32x/
 	sshpass -p$(cat /home/pi/sync_pass) rsync -avz mahuti@192.168.1.93:/Volumes/retropie/opt/retropie/configs/snes/launching.png  /opt/retropie/configs/snes/
  
+### Manage Roms
+
+To manipulate roms into different set types: 
+
+https://recalbox.gitbook.io/tutorials/utility/rom-management/clrmamepro-tutorial
+
+To make Full Non-Merged Roms (Non-Merged Roms that contain their BIOSes), make sure that "Non-Merged" is selected and "Separate Bios Sets" is not checked in the Advanced rebuild settings.
+
 ------------------------------------------------------------------
 ## 5. LOOK AND FEEL
 ------------------------------------------------------------------
@@ -597,6 +624,53 @@ _If you already copied the Launch Screens in the "Copy Files" section you can sk
 [More about launch screens](https://github.com/retropie/retropie-setup/wiki/runcommand#adding-custom-launching-images)
 
 #### RETROARCH
+
+##### Overlays
+
+###### Arcade Overlays
+https://github.com/biscuits99/rp-video-manager
+
+    wget https://github.com/biscuits99/rp-video-manager/releases/download/{release-number}/rp-video-manager.zip
+    unzip -o rp-video-manager.zip
+    rm rp-video-manager.zip
+    cd /home/pi/rp-video-manager
+    chmod 755 videomanager.sh
+    ./videomanager.sh
+
+###### Console Overlays
+For a crap-ton of cheesy overlays, download and install the bezelproject (search on google)
+
+To setup a standard overlay here's an example: 
+
+1. Add the top 2 lines at a minimum to the system retrorarch file `/opt/retropie/configs/atari2600/retroarch.cfg`
+The rest of the lines are examples of setting positioning. Aspect_ratio_index=22 means "use custom aspect ratio" 
+
+    input_overlay = "/opt/retropie/configs/all/retroarch/overlay/Atari-2600.cfg"
+    input_overlay_opacity = "1.000000"
+    custom_viewport_width = 994
+    custom_viewport_height = 758
+    custom_viewport_x = 318
+    custom_viewport_y = 136
+    aspect_ratio_index = 22
+    video_force_aspect = true
+    video_shader = /opt/retropie/configs/all/retroarch/shaders/crt-pi-curvature.glslp
+    video_shader_enable = true
+
+2. the Atari-2600.cfg file mentioned in the RA config should contain something like the following. The png file can be relative to the location of the cfg file if a folder path is not specified.    
+ 
+    overlays = 1
+
+    overlay0_overlay = Atari-2600.png
+
+    overlay0_full_screen = true
+
+    overlay0_descs = 0
+
+3. An individual game file can also be created in the folder for the emulator `/opt/retropie/configs/all/retroarch/config/Stella/Zaxxon (USA).cfg`  
+The file should contain somethng like this: 
+
+    input_overlay = "/opt/retropie/configs/all/retroarch/overlay/GameBezels/Atari2600/Zaxxon (USA).cfg"
+
 
 ##### Exiting For arcade machines: 
 To exit using only escape key
@@ -853,10 +927,10 @@ Download to development folder
 Compile
 
     sudo sh autogen.sh
-    ./configure --enable-ultimateio --enable-ledwiz32 --enable-pacdrive --enable-develop --enable-alsaaudio CPPFLAGS='-DSHOW_OUTPUT=1'
-    (for production use this: ./configure --enable-ultimateio --enable-ledwiz32 --enable-pacdrive --enable-develop --enable-alsaaudio CXXFLAGS='g0 -O3')    
+    ./configure --enable-ultimateio --enable-ledwiz32 --enable-pacdrive --enable-alsaaudio  --enable-develop CPPFLAGS='-DSHOW_OUTPUT=1'
+    (for production use this: ./configure --enable-ultimateio --enable-ledwiz32 --enable-pacdrive --enable-alsaaudio )    
     make clean
-    make -j4
+    make -j5
     sudo make install
     
 
@@ -919,6 +993,8 @@ To capture inputs of gamepads
 To scan for events in MAME games
     
     nc -v localhost 8000
+
+To update: git pull from the development folder, then compile 
 
 ------------------------------------------------------------------
 
@@ -1140,6 +1216,25 @@ _pull from remote location(use -n modifier for dry run test, use -z for compress
 _push to remote location_
 `rsync -a ~/dir1 username@remote_host:destination_directory`
 
+### make app executable 
+
+     chmod +x filename
+     
+### Checking folder sizes
+    
+    sudo du -h / | sort -h -r | head -n 10
+
+### Shortenging and Resetting Log Rotation
+
+Shorten number of weeks of logs to keep
+
+    sudo pico /etc/logrotate.conf
+    
+Delete the status file and run logrotate
+
+    sudo rm /var/lib/logrotate/status 
+    sudo logrotate -f /etc/logrotate.conf 
+
 ### USB Drives
 
 [Partitioning Drives](https://thepihut.com/blogs/raspberry-pi-tutorials/17699796-formatting-and-mounting-a-usb-drive-from-a-terminal-window)
@@ -1280,3 +1375,31 @@ Install this software to use python as a system language
     sudo apt-get install python libusb-1.0
     sudo apt-get install python-pip
     sudo pip install --upgrade pyusb
+    
+
+------------------------------------------------------------------
+## 10. MAME TIPS
+------------------------------------------------------------------
+
+### Mame 2003 Plus
+
+To clear a configured field, don't hit "esc" twice, double tap the "delete" key
+
+    mame2003-plus_skip_disclaimer = "enabled"
+mame2003-plus_skip_warnings = "enabled"
+
+### RetroPie Readonly Mode
+
+If you click "x" and RetroPie says it's readonly mode, try the player1 button or return or something else. 
+
+------------------------------------------------------------------
+## 10. TROUBLESHOOTING
+------------------------------------------------------------------
+
+### RetroPie won't save cfg overrides
+
+One can almost guarantee the option to "save core overrides" was selected at some point. Delete the folder (or move it instead of deleting it) at `/opt/retropie/configs/all/retroarch/confgis/EMULATORNAME`
+
+You can also try setting permissions on the `/opt/retropie/configs/SYSTEMNAME/retroarch.cfg` file, but it's likely the former problem. 
+
+Always save the current retroarch.cfg file configuration, never save core overrides. If you don't see the name of the .cfg file on the screen, you're not in the right place

@@ -1,0 +1,20 @@
+
+<?xml versin="1.0" encoding="UTF-8"?>
+<LEDSpicer
+    version="1.0"
+    type="Animation"
+>
+
+    <actor
+        type="Gradient"
+        group="P1 Except Start"
+        colors="Green,Yellow,Orange,Red,Purple,Blue,Black"
+        tones="12"
+        mode="All"
+        speed="VerySlow"
+        filter="Normal"
+        direction="Forward"
+        endTime="30"
+    />
+ 
+</LEDSpicer>

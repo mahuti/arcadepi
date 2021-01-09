@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+    version="1.0"
+    type="Input"
+    name="Actions"
+    speed="Normal"
+    linkedElements="P1_CREDIT,P1_START"
+    listenEvents="usb-Ultimarc_UltraStik_Ultimarc_Ultra-Stik_Player_1_1-event-joystick,gpio-event-keyboard"
+>
+<!-- Example linking two elements together -->
+    <map
+        type="Element"
+        target="P1_CREDIT"       
+        trigger="6"                           
+        color="Off"                           
+        filter="Normal"                       
+    />
+    <map
+        type="Element"
+        target="P1_START"               
+        trigger="294"                                
+        color="Off"                       
+       filter="Normal"                     
+    />
+</LEDSpicer>

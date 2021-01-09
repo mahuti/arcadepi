@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+        version="1.0"
+        type="Profile"
+        backgroundColor="Off"
+        dataSource="controls.ini,file"
+>
+
+<!--        <alwaysOnGroups>
+                <group name="JOYSTICK" color="Red"/>
+                <group name="TRACKBALL" color="Red"/>
+                <group name="SPINNER" color="Red"/>
+                <group name="BUTTONS3" color="Red"/>
+        </alwaysOnGroups>-->
+        <animations>
+                <animation name="profile_arcade" />
+        </animations>
+        <inputs>
+                <input name="startgame"/>
+                <input name="digdug"/>
+        </inputs>
+</LEDSpicer>
+

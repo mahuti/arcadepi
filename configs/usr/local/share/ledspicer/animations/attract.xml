@@ -1,0 +1,55 @@
+
+<?xml versin="1.0" encoding="UTF-8"?>
+<LEDSpicer
+    version="1.0"
+    type="Animation"
+>
+    <actor
+        type="Gradient"
+        group="P1 Except Start"
+        colors="Green,Yellow,Orange,Red,Purple,Blue,Black"
+        tones="12"
+        mode="Sequential"
+        speed="Slow"
+        filter="Normal"
+        direction="Forward"
+    />
+    <actor
+        type="Serpentine"
+        group="P1 Except Start"
+        color="Gray"
+        speed="Normal"
+        filter="Mask"
+        direction="Forward"
+        tailLength="3"
+        tailColor="AlmostBlack"
+        tailIntensity="75"
+        startTime="0"
+    />
+	<!--<actor
+		type="Serpentine"
+		group="P1 Except Start"
+		colors="Red"
+		mode="Sequential"
+		speed="Normal"
+		filter="Normal"
+		direction="Forward"
+	/>-->
+	<!--<actor
+		type="Pulse"
+		group="P1 Except Start"
+		speed="Normal"
+		filter="Combine"
+		direction="ForwardBouncing"
+		color="White"
+	/>-->
+   <actor
+        type="Pulse"
+	    mode="Linear"
+        group="Start Button"
+        color="Red"
+        speed="Fast"
+        filter="Normal"
+        direction="ForwardBouncing"
+    />
+</LEDSpicer>

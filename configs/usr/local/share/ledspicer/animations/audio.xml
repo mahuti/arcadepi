@@ -1,0 +1,19 @@
+<?xml versin="1.0" encoding="UTF-8"?>
+<LEDSpicer
+    version="1.0"
+    type="Animation"
+>
+<actor
+		type="AlsaAudio"
+		pcm="default"
+		group="Player 1"
+		filter="Normal"
+		direction="Forward"
+		mode="Single"
+		off="Off"
+		low="White"
+		mid="Gray"
+		high="AlmostBlack"
+		channel="Both"
+	/>
+</LEDSpicer>

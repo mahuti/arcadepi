@@ -1,0 +1,25 @@
+
+<?xml versin="1.0" encoding="UTF-8"?>
+<LEDSpicer
+    version="1.0"
+    type="Animation"
+>
+<!--	<actor
+		type="Gradient"
+		group="Player 1"
+		colors="Green,Yellow,Orange,Red,Purple,Blue,Black"
+		mode="Sequential"
+		speed="Normal"
+		filter="Normal"
+		direction="Forward"
+	/>
+	<actor
+		type="Pulse"
+		group="Player 1"
+		speed="Normal"
+		filter="Combine"
+		direction="ForwardBouncing"
+		color="White"
+	/>
+-->
+</LEDSpicer>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LEDSpicer
+    version="1.0"
+    type="Input"
+    name="Mame"
+>
+        <!-- Example with element -->
+        <map
+            type="Element"               
+            target="KNOCKER"   
+            trigger="knocker0"                     
+            color="On"                    
+            filter="Normal"                  
+        />
+
+        <!-- Example with group -->
+        <!--<map
+            type="Element"                
+            target="FLASHER"  
+            trigger="led1"               
+            color="Blue"                  
+            filter="Normal"               
+        />-->
+</LEDSpicer>
