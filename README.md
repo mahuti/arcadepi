@@ -1,4 +1,4 @@
-Anyone that comes across this: Please note, I wrote this for myself to keep track of all the stuff I need to do when setting up a new Pi or running into problems. It's more of a reference than a walk-through. The first part is a bit of a walk-through, but later sections are useful on a more ad-hoc basis. Some of the information gets out of date now and then, but I keep updating this as I go, so there's a lot of useful information here. 
+Anyone that comes across this: Please note, I wrote this for myself to keep track of all the stuff I need to do when setting up a new Pi or running into problems. It's more of a reference than a walk-through. The first part is a bit of a walk-through, but later sections are useful on a more ad-hoc basis. Some of the information gets out of date now and then, but I keep updating this as I go, so there's a lot of useful information here.         
 
 # Modifications
 Plug pi into HDMI & keyboard first before anything else can be done.
@@ -268,6 +268,10 @@ Install and make
 	attract -v
 
 *It's important to load AttractMode the first time so that it creates configuration files. Run `attract` or `attract --loglevel debug` at the commmand line*
+
+To launch attract mode with logging in the terminal, and saved to a log as well: 
+    
+    attract --loglevel debug 2>&1 | tee ~/.attract/log.txt
 
 ##### Install manually for Raspberry Pi 4 / buster
 [Manual compile instructions on GitHub](https://github.com/mickelson/attract/wiki/Compiling-on-the-Raspberry-Pi-4-%28Raspbian-Buster%29)
@@ -589,13 +593,59 @@ To make Full Non-Merged Roms (Non-Merged Roms that contain their BIOSes), make s
 ------------------------------------------------------------------
 ## 5. LOOK AND FEEL
 ------------------------------------------------------------------
+### Hide Content
+
+#### To hide the end messaging
+
+    sudo pico /etc/rc.local
+    
+add `dmesg --console-off` right before `exit 0`
+
+#### To hide the opening content
+
+    sudo pico /boot/cmdline.txt
+
+add 
+    
+    console=tty3 loglevel=3 logo.nologo quiet splash vt.global_cursor_default=0 systemd.show_status=0
+
+#### To hide splash
+
+    sudo pico /boot/config.txt
+    
+add `disable_splash=1`
+
+#### hide auto-login text
+
+    touch ~/.hushlogin
+
+#### Hide/modify message of the day (superseded by .hushlogin if used):
+
+    sudo nano /etc/motd
+    
+#### Hide Autologin Text
+
+    sudo nano /etc/systemd/system/getty@tty1.service.d/autologin.conf
+
+change `ExecStart=-/sbin/agetty --autologin pi --noclear %I $TERM` to 
+`ExecStart=-/sbin/agetty --skip-login --noclear --noissue --login-options "-f pi" %I $TERM`
+
+#### Hide bootloader screen
+
+    sudo -E rpi-eeprom-config --edit
+    
+add 
+
+    DISABLE_HDMI=1 
+    
+reboot
+
 ### Configure Retroarch
 https://github.com/RetroPie/RetroPie-Setup/wiki/Configuration-Editor
 
 	sudo ~/RetroPie-Setup/retropie-setup.sh
 
 C Configuration/Tools > 805 configedit - Edit RetroPie/RetroArch Configurations
-
 
 
 ### Add Splashscreens 
